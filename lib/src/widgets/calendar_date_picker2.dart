@@ -235,7 +235,7 @@ class _CalendarDatePicker2State extends State<CalendarDatePicker2> {
     });
   }
 
-  void _handleYearChanged(DateTime value) {
+  void _handleYearChanged(DateTime value, {bool keepYearMode = false}) {
     _vibrate();
 
     if (value.isBefore(widget.config.firstDate)) {
@@ -245,7 +245,9 @@ class _CalendarDatePicker2State extends State<CalendarDatePicker2> {
     }
 
     setState(() {
-      _mode = CalendarDatePicker2Mode.day;
+      if (!keepYearMode) {
+        _mode = CalendarDatePicker2Mode.day;
+      }
       _handleDisplayedMonthDateChanged(value, fromYearPicker: true);
     });
   }

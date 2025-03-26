@@ -354,7 +354,8 @@ class CalendarDatePicker2Config {
   final ScrollController? monthViewController;
 
   /// Custom scroll controller for the calendar year view
-  final ScrollController? yearViewController;
+  /// Use ScrollController for regular year picker or FixedExtentScrollController for alternative year picker
+  final dynamic yearViewController;
 
   /// Flag to disable mode picker and hide the mode toggle button icon
   final bool? disableModePicker;
@@ -493,7 +494,7 @@ class CalendarDatePicker2Config {
     YearBuilder? yearBuilder,
     MonthBuilder? monthBuilder,
     ScrollController? monthViewController,
-    ScrollController? yearViewController,
+    dynamic yearViewController,
     bool? disableModePicker,
     bool? centerAlignModePicker,
     Widget? customModePickerIcon,
@@ -679,7 +680,7 @@ class CalendarDatePicker2WithActionButtonsConfig
     YearBuilder? yearBuilder,
     MonthBuilder? monthBuilder,
     ScrollController? monthViewController,
-    ScrollController? yearViewController,
+    dynamic yearViewController,
     bool? disableModePicker,
     bool? centerAlignModePicker,
     Widget? customModePickerIcon,
@@ -867,7 +868,7 @@ class CalendarDatePicker2WithActionButtonsConfig
     YearBuilder? yearBuilder,
     MonthBuilder? monthBuilder,
     ScrollController? monthViewController,
-    ScrollController? yearViewController,
+    dynamic yearViewController,
     bool? disableModePicker,
     bool? centerAlignModePicker,
     Widget? customModePickerIcon,

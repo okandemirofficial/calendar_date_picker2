@@ -169,12 +169,25 @@ class _YearPickerState extends State<YearPicker> {
     } else {
       yearItem = InkWell(
         key: ValueKey<int>(year),
-        onTap: () => widget.onChanged(
-          DateTime(
-            year,
-            widget.initialMonth.month,
-          ),
-        ),
+        onTap: () {
+          // Call onChanged with keepYearMode: true to prevent switching to day view
+          if (widget.onChanged is Function(DateTime, {bool keepYearMode})) {
+            (widget.onChanged as dynamic)(
+              DateTime(
+                year,
+                widget.initialMonth.month,
+              ),
+              keepYearMode: true,
+            );
+          } else {
+            widget.onChanged(
+              DateTime(
+                year,
+                widget.initialMonth.month,
+              ),
+            );
+          }
+        },
         child: yearItem,
       );
     }

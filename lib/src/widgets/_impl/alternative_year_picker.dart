@@ -46,7 +46,7 @@ class AlternativeYearPicker extends StatefulWidget {
 }
 
 class _AlternativeYearPickerState extends State<AlternativeYearPicker> {
-  late ScrollController _scrollController;
+  late FixedExtentScrollController _scrollController;
   late List<int> _availableYears;
   late int _selectedYear;
   late int _currentYear;
@@ -90,13 +90,11 @@ class _AlternativeYearPickerState extends State<AlternativeYearPicker> {
 
     // Find the index of the selected year to calculate the scroll offset
     final selectedIndex = _availableYears.indexOf(_selectedYear);
-    final scrollOffset = alternativeConfig?.itemExtent != null
-        ? selectedIndex * alternativeConfig!.itemExtent
-        : 0.0;
 
     // Initialize the scroll controller
-    _scrollController = widget.config.yearViewController ??
-        ScrollController(initialScrollOffset: scrollOffset);
+    _scrollController =
+        widget.config.yearViewController as FixedExtentScrollController? ??
+            FixedExtentScrollController(initialItem: selectedIndex);
   }
 
   @override
@@ -164,7 +162,14 @@ class _AlternativeYearPickerState extends State<AlternativeYearPicker> {
                       currentDate.day,
                     );
 
-                    widget.onChanged(newDate);
+                    // Call onChanged with keepYearMode: true to prevent switching to day view
+                    if (widget.onChanged is Function(DateTime,
+                        {bool keepYearMode})) {
+                      (widget.onChanged as dynamic)(newDate,
+                          keepYearMode: true);
+                    } else {
+                      widget.onChanged(newDate);
+                    }
                   }
                 }
               },

@@ -188,7 +188,7 @@ var results = await showCalendarDatePicker2Dialog(
 | monthTextStyle                   | TextStyle?                        | Custom text style for month(s)                                                                                |
 | selectedMonthTextStyle           | TextStyle?                        | Custom text style for selected month(s)                                                                       |
 | disabledMonthTextStyle           | TextStyle?                        | Custom text style for disabled month(s)                                                                       |
-| yearViewController               | ScrollController?                 | Custom scroll controller for the calendar year view                                                           |
+| yearViewController               | dynamic                           | Custom scroll controller for the calendar year view. Use ScrollController for regular year picker or FixedExtentScrollController for alternative year picker (when using yearPickerMode: YearPickerMode.alternative) |
 | yearBorderRadius                 | BorderRadius?                     | Custom border radius for year indicator                                                                       |
 | yearTextStyle                    | TextStyle?                        | Custom text style for year(s)                                                                                 |
 | selectedYearTextStyle            | TextStyle?                        | Custom text style for selected year(s)                                                                        |
