@@ -16,13 +16,3 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^2.0.1
-
-screenshots:
-  - description: CalendarDatePicker2 day view demo
-    path: example/screenshots/custom_range_picker_demo.png
-  - description: CalendarDatePicker2 month view demo
-    path: example/screenshots/calendar_date_picker_month_view.png
-  - description: CalendarDatePicker2 year view demo
-    path: example/screenshots/custom_range_picker_demo_2.png
-  - description: CalendarDatePicker2 scroll view demo
-    path: example/screenshots/custom_range_picker_demo_scroll.png
