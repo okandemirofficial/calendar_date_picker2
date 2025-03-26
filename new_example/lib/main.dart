@@ -85,11 +85,11 @@ class _CalendarDatePicker2DemoState extends State<CalendarDatePicker2Demo> {
         fontWeight: FontWeight.bold,
       ),
       // Configure the alternative year picker
-      alternativeYearPickerConfig: const AlternativeYearPickerConfig(
+      alternativeYearPickerConfig: AlternativeYearPickerConfig(
         height: 50.0,
         itemExtent: 50.0,
         magnification: 1.0,
-        selectedBackgroundColor: Colors.red,
+        selectedBackgroundColor: Color(0xFFF44336).withValues(alpha: 0.1),
         maxAvailableYear: 2025,
         minAvailableYear: 2020,
       ),

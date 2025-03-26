@@ -258,7 +258,7 @@ class _AlternativeYearPickerState extends State<AlternativeYearPicker> {
     if (selectedColor != null) {
       return Container(
         decoration: BoxDecoration(
-          color: selectedColor.withOpacity(0.1),
+          color: selectedColor,
           borderRadius:
               widget.config.yearBorderRadius ?? BorderRadius.circular(8),
         ),
