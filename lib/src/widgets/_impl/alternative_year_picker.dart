@@ -261,10 +261,6 @@ class _AlternativeYearPickerState extends State<AlternativeYearPicker> {
           color: selectedColor.withOpacity(0.1),
           borderRadius:
               widget.config.yearBorderRadius ?? BorderRadius.circular(8),
-          border: Border.all(
-            color: selectedColor,
-            width: 1.0,
-          ),
         ),
       );
     }

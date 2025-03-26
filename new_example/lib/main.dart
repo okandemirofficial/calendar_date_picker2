@@ -71,7 +71,7 @@ class _CalendarDatePicker2DemoState extends State<CalendarDatePicker2Demo> {
   Widget _buildAlternativeYearPickerExample() {
     // Configure the calendar
     final config = CalendarDatePicker2Config(
-      calendarType: CalendarDatePicker2Type.single,
+      calendarType: CalendarDatePicker2Type.multi,
       calendarViewMode: CalendarDatePicker2Mode.year,
       yearPickerMode: YearPickerMode.alternative,
       selectedDayHighlightColor: Colors.blue,
@@ -86,11 +86,10 @@ class _CalendarDatePicker2DemoState extends State<CalendarDatePicker2Demo> {
       ),
       // Configure the alternative year picker
       alternativeYearPickerConfig: const AlternativeYearPickerConfig(
-        height: 200.0,
+        height: 50.0,
         itemExtent: 50.0,
-        perspective: 0.005,
-        diameterRatio: 1.4,
-        selectedBackgroundColor: Colors.blue,
+        magnification: 1.0,
+        selectedBackgroundColor: Colors.red,
         maxAvailableYear: 2025,
         minAvailableYear: 2020,
       ),
