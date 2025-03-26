@@ -47,14 +47,54 @@ class AlternativeYearPicker extends StatefulWidget {
 
 class _AlternativeYearPickerState extends State<AlternativeYearPicker> {
   late ScrollController _scrollController;
+  late List<int> _availableYears;
+  late int _selectedYear;
+  late int _currentYear;
 
   @override
   void initState() {
     super.initState();
-    final scrollOffset =
+    _initializeYearPicker();
+  }
+
+  void _initializeYearPicker() {
+    final config = widget.config;
+    final alternativeConfig = config.alternativeYearPickerConfig;
+
+    // Get current year for highlighting
+    _currentYear = DateUtils.dateOnly(DateTime.now()).year;
+
+    // Set the selected year if available, otherwise use the current year
+    _selectedYear =
         widget.selectedDates.isNotEmpty && widget.selectedDates[0] != null
-            ? _getScrollOffsetForYear(widget.selectedDates[0]!)
-            : _getScrollOffsetForYear(DateUtils.dateOnly(DateTime.now()));
+            ? widget.selectedDates[0]!.year
+            : _currentYear;
+
+    // Determine available years
+    final firstYear =
+        alternativeConfig?.minAvailableYear ?? widget.config.firstDate.year;
+    final lastYear =
+        alternativeConfig?.maxAvailableYear ?? widget.config.lastDate.year;
+
+    // Create the list of available years
+    _availableYears = List.generate(
+      lastYear - firstYear + 1,
+      (index) => firstYear + index,
+    );
+
+    // Check if the selected year is within the available years
+    // If not, select the closest available year
+    if (!_availableYears.contains(_selectedYear)) {
+      _selectedYear = _selectedYear < firstYear ? firstYear : lastYear;
+    }
+
+    // Find the index of the selected year to calculate the scroll offset
+    final selectedIndex = _availableYears.indexOf(_selectedYear);
+    final scrollOffset = alternativeConfig?.itemExtent != null
+        ? selectedIndex * alternativeConfig!.itemExtent
+        : 0.0;
+
+    // Initialize the scroll controller
     _scrollController = widget.config.yearViewController ??
         ScrollController(initialScrollOffset: scrollOffset);
   }
@@ -62,25 +102,26 @@ class _AlternativeYearPickerState extends State<AlternativeYearPicker> {
   @override
   void didUpdateWidget(AlternativeYearPicker oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.selectedDates != oldWidget.selectedDates) {
-      final scrollOffset =
-          widget.selectedDates.isNotEmpty && widget.selectedDates[0] != null
-              ? _getScrollOffsetForYear(widget.selectedDates[0]!)
-              : _getScrollOffsetForYear(DateUtils.dateOnly(DateTime.now()));
-      _scrollController.jumpTo(scrollOffset);
+    if (widget.selectedDates != oldWidget.selectedDates ||
+        widget.config != oldWidget.config) {
+      _initializeYearPicker();
     }
-  }
-
-  double _getScrollOffsetForYear(DateTime date) {
-    // This method will be implemented to calculate scroll position for selected year
-    // For now, return 0 as a placeholder
-    return 0.0;
   }
 
   @override
   Widget build(BuildContext context) {
-    // Return an empty Container as placeholder for the implementation
-    // This will be replaced with the actual implementation in the future
+    final alternativeConfig = widget.config.alternativeYearPickerConfig;
+    final theme = Theme.of(context);
+
+    // Default text styles based on theme
+    final defaultYearTextStyle =
+        widget.config.yearTextStyle ?? theme.textTheme.bodyLarge;
+    final defaultSelectedYearTextStyle = widget.config.selectedYearTextStyle ??
+        theme.textTheme.headlineSmall
+            ?.copyWith(color: theme.colorScheme.primary);
+    final defaultDisabledYearTextStyle = widget.config.disabledYearTextStyle ??
+        theme.textTheme.bodyLarge?.copyWith(color: theme.disabledColor);
+
     return Column(
       children: <Widget>[
         Divider(
@@ -89,10 +130,112 @@ class _AlternativeYearPickerState extends State<AlternativeYearPicker> {
               : null,
         ),
         Expanded(
-          child: Center(
-            child: Text(
-              'Alternative Year Picker',
-              style: Theme.of(context).textTheme.titleLarge,
+          child: Container(
+            height: alternativeConfig?.height ?? 180.0,
+            color: alternativeConfig?.backgroundColor,
+            child: ListWheelScrollView.useDelegate(
+              controller: _scrollController,
+              physics: const FixedExtentScrollPhysics(),
+              diameterRatio: alternativeConfig?.diameterRatio ?? 1.5,
+              perspective: alternativeConfig?.perspective ?? 0.01,
+              offAxisFraction: alternativeConfig?.offAxisFraction ?? 0.0,
+              squeeze: alternativeConfig?.squeeze ?? 1.0,
+              magnification: alternativeConfig?.magnification ?? 1.2,
+              itemExtent: alternativeConfig?.itemExtent ?? 40.0,
+              onSelectedItemChanged: (index) {
+                if (index >= 0 && index < _availableYears.length) {
+                  final year = _availableYears[index];
+                  if (_selectedYear != year) {
+                    setState(() {
+                      _selectedYear = year;
+                    });
+
+                    // Create a new date based on the selected year
+                    // and the current selected date
+                    final currentDate = widget.selectedDates.isNotEmpty &&
+                            widget.selectedDates[0] != null
+                        ? widget.selectedDates[0]!
+                        : widget.initialMonth;
+
+                    // Update the date maintaining the month and day
+                    final newDate = DateTime(
+                      year,
+                      currentDate.month,
+                      currentDate.day,
+                    );
+
+                    widget.onChanged(newDate);
+                  }
+                }
+              },
+              childDelegate: ListWheelChildBuilderDelegate(
+                childCount: _availableYears.length,
+                builder: (context, index) {
+                  final year = _availableYears[index];
+                  final isSelected = year == _selectedYear;
+                  final isCurrentYear = year == _currentYear;
+
+                  // Check if year is selectable
+                  final isDisabled =
+                      widget.config.selectableYearPredicate != null &&
+                          !widget.config.selectableYearPredicate!(year);
+
+                  // Use custom builder if provided
+                  if (widget.config.yearBuilder != null) {
+                    final customWidget = widget.config.yearBuilder!(
+                      year: year,
+                      textStyle: isDisabled
+                          ? defaultDisabledYearTextStyle
+                          : (isSelected
+                              ? defaultSelectedYearTextStyle
+                              : defaultYearTextStyle),
+                      decoration: isSelected &&
+                              alternativeConfig?.selectedBackgroundColor != null
+                          ? BoxDecoration(
+                              color: alternativeConfig!.selectedBackgroundColor,
+                              borderRadius: widget.config.yearBorderRadius ??
+                                  BorderRadius.circular(8),
+                            )
+                          : null,
+                      isSelected: isSelected,
+                      isDisabled: isDisabled,
+                      isCurrentYear: isCurrentYear,
+                    );
+
+                    if (customWidget != null) {
+                      return customWidget;
+                    }
+                  }
+
+                  // Default year item widget
+                  return Center(
+                    child: Container(
+                      decoration: isSelected &&
+                              alternativeConfig?.selectedBackgroundColor != null
+                          ? BoxDecoration(
+                              color: alternativeConfig!.selectedBackgroundColor,
+                              borderRadius: widget.config.yearBorderRadius ??
+                                  BorderRadius.circular(8),
+                            )
+                          : null,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0, vertical: 8.0),
+                      child: Text(
+                        year.toString(),
+                        style: isDisabled
+                            ? (alternativeConfig?.disabledYearTextStyle ??
+                                defaultDisabledYearTextStyle)
+                            : (isSelected
+                                ? (alternativeConfig?.selectedYearTextStyle ??
+                                    defaultSelectedYearTextStyle)
+                                : (alternativeConfig?.yearTextStyle ??
+                                    defaultYearTextStyle)),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  );
+                },
+              ),
             ),
           ),
         ),

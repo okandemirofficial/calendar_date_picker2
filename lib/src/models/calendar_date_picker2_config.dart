@@ -210,6 +210,7 @@ class CalendarDatePicker2Config {
     this.selectedRangeHighlightBuilder,
     this.selectedRangeDecorationPredicate,
     this.yearPickerMode,
+    this.alternativeYearPickerConfig,
   })  : calendarType = calendarType ?? CalendarDatePicker2Type.single,
         firstDate = DateUtils.dateOnly(firstDate ?? DateTime(1970)),
         lastDate =
@@ -444,6 +445,9 @@ class CalendarDatePicker2Config {
   /// The year picker style to use
   final YearPickerMode? yearPickerMode;
 
+  /// Configuration options for alternative year picker
+  final AlternativeYearPickerConfig? alternativeYearPickerConfig;
+
   /// Copy the current [CalendarDatePicker2Config] with some new values
   CalendarDatePicker2Config copyWith({
     CalendarDatePicker2Type? calendarType,
@@ -518,6 +522,7 @@ class CalendarDatePicker2Config {
     SelectedRangeHighlightBuilder? selectedRangeHighlightBuilder,
     SelectedRangeDecorationPredicate? selectedRangeDecorationPredicate,
     YearPickerMode? yearPickerMode,
+    AlternativeYearPickerConfig? alternativeYearPickerConfig,
   }) {
     return CalendarDatePicker2Config(
       calendarType: calendarType ?? this.calendarType,
@@ -622,6 +627,8 @@ class CalendarDatePicker2Config {
       selectedRangeDecorationPredicate: selectedRangeDecorationPredicate ??
           this.selectedRangeDecorationPredicate,
       yearPickerMode: yearPickerMode ?? this.yearPickerMode,
+      alternativeYearPickerConfig:
+          alternativeYearPickerConfig ?? this.alternativeYearPickerConfig,
     );
   }
 }
@@ -658,7 +665,6 @@ class CalendarDatePicker2WithActionButtonsConfig
     TextStyle? yearTextStyle,
     TextStyle? selectedYearTextStyle,
     TextStyle? disabledYearTextStyle,
-    TextStyle? selectedRangeDayTextStyle,
     TextStyle? monthTextStyle,
     TextStyle? selectedMonthTextStyle,
     TextStyle? disabledMonthTextStyle,
@@ -680,6 +686,7 @@ class CalendarDatePicker2WithActionButtonsConfig
     ModePickerTextHandler? modePickerTextHandler,
     ModePickerBuilder? modePickerBuilder,
     double? modePickersGap,
+    TextStyle? selectedRangeDayTextStyle,
     bool? rangeBidirectional,
     ScrollPhysics? calendarViewScrollPhysics,
     Color? daySplashColor,
@@ -689,28 +696,29 @@ class CalendarDatePicker2WithActionButtonsConfig
     double? dayMaxWidth,
     bool? hideMonthPickerDividers,
     bool? hideYearPickerDividers,
+    ScrollController? scrollViewController,
+    ScrollViewMonthYearBuilder? scrollViewMonthYearBuilder,
+    ScrollViewOnScrolling? scrollViewOnScrolling,
+    BoxConstraints? scrollViewConstraints,
     TextStyle? scrollViewTopHeaderTextStyle,
     bool? hideScrollViewTopHeader,
     bool? hideScrollViewTopHeaderDivider,
     bool? hideScrollViewMonthWeekHeader,
-    BoxConstraints? scrollViewConstraints,
-    ScrollViewMonthYearBuilder? scrollViewMonthYearBuilder,
-    ScrollViewOnScrolling? scrollViewOnScrolling,
-    ScrollController? scrollViewController,
     bool? dynamicCalendarRows,
     Axis? dayModeScrollDirection,
+    this.openedFromDialog = false,
+    this.closeDialogOnCancelTapped = false,
+    this.closeDialogOnOkTapped = true,
+    this.gapBetweenCalendarAndButtons = 10.0,
+    this.cancelButton,
+    this.okButton,
+    this.cancelButtonTextStyle,
+    this.okButtonTextStyle,
+    this.buttonPadding,
     SelectedRangeHighlightBuilder? selectedRangeHighlightBuilder,
     SelectedRangeDecorationPredicate? selectedRangeDecorationPredicate,
     YearPickerMode? yearPickerMode,
-    this.gapBetweenCalendarAndButtons,
-    this.cancelButtonTextStyle,
-    this.cancelButton,
-    this.okButtonTextStyle,
-    this.okButton,
-    this.openedFromDialog,
-    this.closeDialogOnCancelTapped,
-    this.closeDialogOnOkTapped,
-    this.buttonPadding,
+    AlternativeYearPickerConfig? alternativeYearPickerConfig,
   }) : super(
           calendarType: calendarType,
           firstDate: firstDate,
@@ -733,7 +741,6 @@ class CalendarDatePicker2WithActionButtonsConfig
           dayViewController: dayViewController,
           dayTextStyle: dayTextStyle,
           selectedDayTextStyle: selectedDayTextStyle,
-          selectedRangeDayTextStyle: selectedRangeDayTextStyle,
           selectedDayHighlightColor: selectedDayHighlightColor,
           selectedRangeHighlightColor: selectedRangeHighlightColor,
           disabledDayTextStyle: disabledDayTextStyle,
@@ -762,6 +769,7 @@ class CalendarDatePicker2WithActionButtonsConfig
           modePickerTextHandler: modePickerTextHandler,
           modePickerBuilder: modePickerBuilder,
           modePickersGap: modePickersGap,
+          selectedRangeDayTextStyle: selectedRangeDayTextStyle,
           rangeBidirectional: rangeBidirectional,
           calendarViewScrollPhysics: calendarViewScrollPhysics,
           daySplashColor: daySplashColor,
@@ -771,48 +779,50 @@ class CalendarDatePicker2WithActionButtonsConfig
           dayMaxWidth: dayMaxWidth,
           hideMonthPickerDividers: hideMonthPickerDividers,
           hideYearPickerDividers: hideYearPickerDividers,
+          scrollViewController: scrollViewController,
+          scrollViewMonthYearBuilder: scrollViewMonthYearBuilder,
+          scrollViewOnScrolling: scrollViewOnScrolling,
+          scrollViewConstraints: scrollViewConstraints,
           scrollViewTopHeaderTextStyle: scrollViewTopHeaderTextStyle,
           hideScrollViewTopHeader: hideScrollViewTopHeader,
           hideScrollViewTopHeaderDivider: hideScrollViewTopHeaderDivider,
           hideScrollViewMonthWeekHeader: hideScrollViewMonthWeekHeader,
-          scrollViewConstraints: scrollViewConstraints,
-          scrollViewMonthYearBuilder: scrollViewMonthYearBuilder,
-          scrollViewOnScrolling: scrollViewOnScrolling,
-          scrollViewController: scrollViewController,
           dynamicCalendarRows: dynamicCalendarRows,
           dayModeScrollDirection: dayModeScrollDirection,
           selectedRangeHighlightBuilder: selectedRangeHighlightBuilder,
           selectedRangeDecorationPredicate: selectedRangeDecorationPredicate,
           yearPickerMode: yearPickerMode,
+          alternativeYearPickerConfig: alternativeYearPickerConfig,
         );
 
-  /// The gap between calendar and action buttons
-  final double? gapBetweenCalendarAndButtons;
+  /// Whether the date picker is displayed as a dialog
+  final bool openedFromDialog;
 
-  /// Text style for cancel button
-  final TextStyle? cancelButtonTextStyle;
+  /// Whether to close the dialog when the cancel button is tapped
+  final bool closeDialogOnCancelTapped;
+
+  /// Whether to close the dialog when the ok button is tapped
+  final bool closeDialogOnOkTapped;
+
+  /// Gap between calendar and action buttons
+  final double gapBetweenCalendarAndButtons;
 
   /// Custom cancel button
   final Widget? cancelButton;
 
-  /// Text style for ok button
-  final TextStyle? okButtonTextStyle;
-
   /// Custom ok button
   final Widget? okButton;
 
-  /// Is the calendar opened from dialog
-  final bool? openedFromDialog;
+  /// Cancel button text style
+  final TextStyle? cancelButtonTextStyle;
 
-  /// If the dialog should be closed when user taps the CANCEL button
-  final bool? closeDialogOnCancelTapped;
+  /// Ok button text style
+  final TextStyle? okButtonTextStyle;
 
-  /// If the dialog should be closed when user taps the OK button
-  final bool? closeDialogOnOkTapped;
-
-  /// Custom wrapping padding for Ok & Cancel buttons
+  /// Padding for the action buttons
   final EdgeInsets? buttonPadding;
 
+  /// Copy the current [CalendarDatePicker2WithActionButtonsConfig] with some new values
   @override
   CalendarDatePicker2WithActionButtonsConfig copyWith({
     CalendarDatePicker2Type? calendarType,
@@ -836,7 +846,6 @@ class CalendarDatePicker2WithActionButtonsConfig
     PageController? dayViewController,
     TextStyle? dayTextStyle,
     TextStyle? selectedDayTextStyle,
-    TextStyle? selectedRangeDayTextStyle,
     Color? selectedDayHighlightColor,
     Color? selectedRangeHighlightColor,
     TextStyle? disabledDayTextStyle,
@@ -865,15 +874,7 @@ class CalendarDatePicker2WithActionButtonsConfig
     ModePickerTextHandler? modePickerTextHandler,
     ModePickerBuilder? modePickerBuilder,
     double? modePickersGap,
-    double? gapBetweenCalendarAndButtons,
-    TextStyle? cancelButtonTextStyle,
-    Widget? cancelButton,
-    TextStyle? okButtonTextStyle,
-    Widget? okButton,
-    bool? openedFromDialog,
-    bool? closeDialogOnCancelTapped,
-    bool? closeDialogOnOkTapped,
-    EdgeInsets? buttonPadding,
+    TextStyle? selectedRangeDayTextStyle,
     bool? rangeBidirectional,
     ScrollPhysics? calendarViewScrollPhysics,
     Color? daySplashColor,
@@ -883,24 +884,34 @@ class CalendarDatePicker2WithActionButtonsConfig
     double? dayMaxWidth,
     bool? hideMonthPickerDividers,
     bool? hideYearPickerDividers,
+    ScrollController? scrollViewController,
+    ScrollViewMonthYearBuilder? scrollViewMonthYearBuilder,
+    ScrollViewOnScrolling? scrollViewOnScrolling,
+    BoxConstraints? scrollViewConstraints,
     TextStyle? scrollViewTopHeaderTextStyle,
     bool? hideScrollViewTopHeader,
     bool? hideScrollViewTopHeaderDivider,
     bool? hideScrollViewMonthWeekHeader,
-    BoxConstraints? scrollViewConstraints,
-    ScrollViewMonthYearBuilder? scrollViewMonthYearBuilder,
-    ScrollViewOnScrolling? scrollViewOnScrolling,
-    ScrollController? scrollViewController,
     bool? dynamicCalendarRows,
     Axis? dayModeScrollDirection,
+    bool? openedFromDialog,
+    bool? closeDialogOnCancelTapped,
+    bool? closeDialogOnOkTapped,
+    double? gapBetweenCalendarAndButtons,
+    Widget? cancelButton,
+    Widget? okButton,
+    TextStyle? cancelButtonTextStyle,
+    TextStyle? okButtonTextStyle,
+    EdgeInsets? buttonPadding,
     SelectedRangeHighlightBuilder? selectedRangeHighlightBuilder,
     SelectedRangeDecorationPredicate? selectedRangeDecorationPredicate,
     YearPickerMode? yearPickerMode,
+    AlternativeYearPickerConfig? alternativeYearPickerConfig,
   }) {
     return CalendarDatePicker2WithActionButtonsConfig(
       calendarType: calendarType ?? this.calendarType,
-      firstDate: DateUtils.dateOnly(firstDate ?? this.firstDate),
-      lastDate: DateUtils.dateOnly(lastDate ?? this.lastDate),
+      firstDate: firstDate ?? this.firstDate,
+      lastDate: lastDate ?? this.lastDate,
       currentDate: currentDate ?? this.currentDate,
       calendarViewMode: calendarViewMode ?? this.calendarViewMode,
       weekdayLabels: weekdayLabels ?? this.weekdayLabels,
@@ -921,8 +932,6 @@ class CalendarDatePicker2WithActionButtonsConfig
       dayViewController: dayViewController ?? this.dayViewController,
       dayTextStyle: dayTextStyle ?? this.dayTextStyle,
       selectedDayTextStyle: selectedDayTextStyle ?? this.selectedDayTextStyle,
-      selectedRangeDayTextStyle:
-          selectedRangeDayTextStyle ?? this.selectedRangeDayTextStyle,
       selectedDayHighlightColor:
           selectedDayHighlightColor ?? this.selectedDayHighlightColor,
       selectedRangeHighlightColor:
@@ -963,20 +972,9 @@ class CalendarDatePicker2WithActionButtonsConfig
           modePickerTextHandler ?? this.modePickerTextHandler,
       modePickerBuilder: modePickerBuilder ?? this.modePickerBuilder,
       modePickersGap: modePickersGap ?? this.modePickersGap,
+      selectedRangeDayTextStyle:
+          selectedRangeDayTextStyle ?? this.selectedRangeDayTextStyle,
       rangeBidirectional: rangeBidirectional ?? this.rangeBidirectional,
-      gapBetweenCalendarAndButtons:
-          gapBetweenCalendarAndButtons ?? this.gapBetweenCalendarAndButtons,
-      cancelButtonTextStyle:
-          cancelButtonTextStyle ?? this.cancelButtonTextStyle,
-      cancelButton: cancelButton ?? this.cancelButton,
-      okButtonTextStyle: okButtonTextStyle ?? this.okButtonTextStyle,
-      okButton: okButton ?? this.okButton,
-      openedFromDialog: openedFromDialog ?? this.openedFromDialog,
-      closeDialogOnCancelTapped:
-          closeDialogOnCancelTapped ?? this.closeDialogOnCancelTapped,
-      closeDialogOnOkTapped:
-          closeDialogOnOkTapped ?? this.closeDialogOnOkTapped,
-      buttonPadding: buttonPadding ?? this.buttonPadding,
       calendarViewScrollPhysics:
           calendarViewScrollPhysics ?? this.calendarViewScrollPhysics,
       daySplashColor: daySplashColor ?? this.daySplashColor,
@@ -990,6 +988,13 @@ class CalendarDatePicker2WithActionButtonsConfig
           hideMonthPickerDividers ?? this.hideMonthPickerDividers,
       hideYearPickerDividers:
           hideYearPickerDividers ?? this.hideYearPickerDividers,
+      scrollViewController: scrollViewController ?? this.scrollViewController,
+      scrollViewMonthYearBuilder:
+          scrollViewMonthYearBuilder ?? this.scrollViewMonthYearBuilder,
+      scrollViewOnScrolling:
+          scrollViewOnScrolling ?? this.scrollViewOnScrolling,
+      scrollViewConstraints:
+          scrollViewConstraints ?? this.scrollViewConstraints,
       scrollViewTopHeaderTextStyle:
           scrollViewTopHeaderTextStyle ?? this.scrollViewTopHeaderTextStyle,
       hideScrollViewTopHeader:
@@ -998,13 +1003,6 @@ class CalendarDatePicker2WithActionButtonsConfig
           hideScrollViewTopHeaderDivider ?? this.hideScrollViewTopHeaderDivider,
       hideScrollViewMonthWeekHeader:
           hideScrollViewMonthWeekHeader ?? this.hideScrollViewMonthWeekHeader,
-      scrollViewConstraints:
-          scrollViewConstraints ?? this.scrollViewConstraints,
-      scrollViewMonthYearBuilder:
-          scrollViewMonthYearBuilder ?? this.scrollViewMonthYearBuilder,
-      scrollViewOnScrolling:
-          scrollViewOnScrolling ?? this.scrollViewOnScrolling,
-      scrollViewController: scrollViewController ?? this.scrollViewController,
       dynamicCalendarRows: dynamicCalendarRows ?? this.dynamicCalendarRows,
       dayModeScrollDirection:
           dayModeScrollDirection ?? this.dayModeScrollDirection,
@@ -1013,6 +1011,93 @@ class CalendarDatePicker2WithActionButtonsConfig
       selectedRangeDecorationPredicate: selectedRangeDecorationPredicate ??
           this.selectedRangeDecorationPredicate,
       yearPickerMode: yearPickerMode ?? this.yearPickerMode,
+      alternativeYearPickerConfig:
+          alternativeYearPickerConfig ?? this.alternativeYearPickerConfig,
+      openedFromDialog: openedFromDialog ?? this.openedFromDialog,
+      closeDialogOnCancelTapped:
+          closeDialogOnCancelTapped ?? this.closeDialogOnCancelTapped,
+      closeDialogOnOkTapped:
+          closeDialogOnOkTapped ?? this.closeDialogOnOkTapped,
+      gapBetweenCalendarAndButtons:
+          gapBetweenCalendarAndButtons ?? this.gapBetweenCalendarAndButtons,
+      cancelButton: cancelButton ?? this.cancelButton,
+      okButton: okButton ?? this.okButton,
+      cancelButtonTextStyle:
+          cancelButtonTextStyle ?? this.cancelButtonTextStyle,
+      okButtonTextStyle: okButtonTextStyle ?? this.okButtonTextStyle,
+      buttonPadding: buttonPadding ?? this.buttonPadding,
     );
   }
+}
+
+/// Configuration options for alternative year picker
+class AlternativeYearPickerConfig {
+  /// Creates a configuration object for alternative year picker.
+  const AlternativeYearPickerConfig({
+    this.height = 180.0,
+    this.backgroundColor,
+    this.selectedBackgroundColor,
+    this.itemExtent = 40.0,
+    this.yearTextStyle,
+    this.selectedYearTextStyle,
+    this.disabledYearTextStyle,
+    this.minAvailableYear,
+    this.maxAvailableYear,
+    this.magnification = 1.2,
+    this.diameterRatio = 1.5,
+    this.offAxisFraction = 0.0,
+    this.squeeze = 1.0,
+    this.perspective = 0.01,
+  });
+
+  /// The height of the year picker wheel.
+  final double height;
+
+  /// Background color of the year picker.
+  final Color? backgroundColor;
+
+  /// Background color of the selected year item.
+  final Color? selectedBackgroundColor;
+
+  /// The height of each year item in the picker.
+  final double itemExtent;
+
+  /// Text style for year items.
+  final TextStyle? yearTextStyle;
+
+  /// Text style for the selected year item.
+  final TextStyle? selectedYearTextStyle;
+
+  /// Text style for disabled year items.
+  final TextStyle? disabledYearTextStyle;
+
+  /// Minimum available year to display in the picker.
+  final int? minAvailableYear;
+
+  /// Maximum available year to display in the picker.
+  final int? maxAvailableYear;
+
+  /// The magnification factor for the selected item.
+  ///
+  /// This causes the selected item to appear larger
+  /// than the other items.
+  final double magnification;
+
+  /// The ratio of the diameter of the picker to the size of the item.
+  ///
+  /// This affects how much the picker curves.
+  final double diameterRatio;
+
+  /// The offset of the picker away from the center.
+  ///
+  /// This affects how much the picker curves.
+  final double offAxisFraction;
+
+  /// How much the picker is squeezed horizontally.
+  ///
+  /// This affects how much the picker curves.
+  final double squeeze;
+
+  /// The amount of perspective applied to the wheel.
+  final double perspective;
 }

@@ -338,13 +338,21 @@ class _CalendarDatePicker2State extends State<CalendarDatePicker2> {
         return Padding(
           padding: EdgeInsets.only(
               top: widget.config.controlsHeight ?? _subHeaderHeight),
-          child: YearPicker(
-            config: widget.config,
-            key: _yearPickerKey,
-            initialMonth: _currentDisplayedMonthDate,
-            selectedDates: _selectedDates,
-            onChanged: _handleYearChanged,
-          ),
+          child: widget.config.yearPickerMode == YearPickerMode.alternative
+              ? AlternativeYearPicker(
+                  config: widget.config,
+                  key: _yearPickerKey,
+                  initialMonth: _currentDisplayedMonthDate,
+                  selectedDates: _selectedDates,
+                  onChanged: _handleYearChanged,
+                )
+              : YearPicker(
+                  config: widget.config,
+                  key: _yearPickerKey,
+                  initialMonth: _currentDisplayedMonthDate,
+                  selectedDates: _selectedDates,
+                  onChanged: _handleYearChanged,
+                ),
         );
       case CalendarDatePicker2Mode.scroll:
         return Container(
