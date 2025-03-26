@@ -17,7 +17,6 @@ part '_impl/_day_picker.dart';
 part '_impl/_focus_date.dart';
 part '_impl/_month_picker.dart';
 part '_impl/year_picker.dart';
-part '_impl/alternative_year_picker.dart';
 
 const Duration _monthScrollDuration = Duration(milliseconds: 200);
 
@@ -338,21 +337,13 @@ class _CalendarDatePicker2State extends State<CalendarDatePicker2> {
         return Padding(
           padding: EdgeInsets.only(
               top: widget.config.controlsHeight ?? _subHeaderHeight),
-          child: widget.config.yearPickerStyle == YearPickerStyle.grid
-              ? YearPicker(
-                  config: widget.config,
-                  key: _yearPickerKey,
-                  initialMonth: _currentDisplayedMonthDate,
-                  selectedDates: _selectedDates,
-                  onChanged: _handleYearChanged,
-                )
-              : AlternativeYearPicker(
-                  config: widget.config,
-                  key: _yearPickerKey,
-                  initialMonth: _currentDisplayedMonthDate,
-                  selectedDates: _selectedDates,
-                  onChanged: _handleYearChanged,
-                ),
+          child: YearPicker(
+            config: widget.config,
+            key: _yearPickerKey,
+            initialMonth: _currentDisplayedMonthDate,
+            selectedDates: _selectedDates,
+            onChanged: _handleYearChanged,
+          ),
         );
       case CalendarDatePicker2Mode.scroll:
         return Container(

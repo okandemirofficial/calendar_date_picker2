@@ -40,15 +40,6 @@ enum CalendarDatePicker2Mode {
   scroll,
 }
 
-/// Custom enum for year picker styles.
-enum YearPickerStyle {
-  /// The default year picker style with a grid view.
-  grid,
-
-  /// Alternative year picker style.
-  alternative,
-}
-
 /// Custom builder for the weekday label widget
 typedef WeekdayLabelBuilder = Widget? Function({
   required int weekday,
@@ -143,7 +134,6 @@ class CalendarDatePicker2Config {
     DateTime? lastDate,
     DateTime? currentDate,
     CalendarDatePicker2Mode? calendarViewMode,
-    YearPickerStyle? yearPickerStyle,
     this.weekdayLabels,
     this.weekdayLabelTextStyle,
     this.weekdayLabelBuilder,
@@ -210,16 +200,12 @@ class CalendarDatePicker2Config {
     this.dayModeScrollDirection,
     this.selectedRangeHighlightBuilder,
     this.selectedRangeDecorationPredicate,
-    this.yearPickerHeight,
-    this.yearPickerRowHeight,
-    this.yearFontSize,
   })  : calendarType = calendarType ?? CalendarDatePicker2Type.single,
         firstDate = DateUtils.dateOnly(firstDate ?? DateTime(1970)),
         lastDate =
             DateUtils.dateOnly(lastDate ?? DateTime(DateTime.now().year + 50)),
         currentDate = currentDate ?? DateUtils.dateOnly(DateTime.now()),
-        calendarViewMode = calendarViewMode ?? CalendarDatePicker2Mode.day,
-        yearPickerStyle = yearPickerStyle ?? YearPickerStyle.grid;
+        calendarViewMode = calendarViewMode ?? CalendarDatePicker2Mode.day;
 
   /// The enabled date picker mode
   final CalendarDatePicker2Type calendarType;
@@ -445,18 +431,6 @@ class CalendarDatePicker2Config {
   /// Predicate to determine the day widget box decoration for a day in selected range
   final SelectedRangeDecorationPredicate? selectedRangeDecorationPredicate;
 
-  /// Custom year picker style
-  final YearPickerStyle yearPickerStyle;
-
-  /// Custom height for the iOS style year picker
-  final double? yearPickerHeight;
-
-  /// Custom row height for the iOS style year picker
-  final double? yearPickerRowHeight;
-
-  /// Custom font size for the iOS style year picker
-  final double? yearFontSize;
-
   /// Copy the current [CalendarDatePicker2Config] with some new values
   CalendarDatePicker2Config copyWith({
     CalendarDatePicker2Type? calendarType,
@@ -478,9 +452,6 @@ class CalendarDatePicker2Config {
     Map<CalendarDatePicker2SemanticsLabel, String?>? semanticsDictionary,
     bool? disableVibration,
     PageController? dayViewController,
-    double? yearPickerHeight,
-    double? yearPickerRowHeight,
-    double? yearFontSize,
     TextStyle? dayTextStyle,
     TextStyle? selectedDayTextStyle,
     Color? selectedDayHighlightColor,
@@ -533,10 +504,6 @@ class CalendarDatePicker2Config {
     Axis? dayModeScrollDirection,
     SelectedRangeHighlightBuilder? selectedRangeHighlightBuilder,
     SelectedRangeDecorationPredicate? selectedRangeDecorationPredicate,
-    YearPickerStyle? yearPickerStyle,
-    double? yearPickerHeight,
-    double? yearPickerRowHeight,
-    double? yearFontSize,
   }) {
     return CalendarDatePicker2Config(
       calendarType: calendarType ?? this.calendarType,
@@ -560,9 +527,6 @@ class CalendarDatePicker2Config {
       semanticsDictionary: semanticsDictionary ?? this.semanticsDictionary,
       disableVibration: disableVibration ?? this.disableVibration,
       dayViewController: dayViewController ?? this.dayViewController,
-      yearPickerHeight: yearPickerHeight ?? this.yearPickerHeight,
-      yearPickerRowHeight: yearPickerRowHeight ?? this.yearPickerRowHeight,
-      yearFontSize: yearFontSize ?? this.yearFontSize,
       dayTextStyle: dayTextStyle ?? this.dayTextStyle,
       selectedDayTextStyle: selectedDayTextStyle ?? this.selectedDayTextStyle,
       selectedDayHighlightColor:
@@ -643,7 +607,6 @@ class CalendarDatePicker2Config {
           selectedRangeHighlightBuilder ?? this.selectedRangeHighlightBuilder,
       selectedRangeDecorationPredicate: selectedRangeDecorationPredicate ??
           this.selectedRangeDecorationPredicate,
-      yearPickerStyle: yearPickerStyle ?? this.yearPickerStyle,
     );
   }
 }
@@ -657,7 +620,6 @@ class CalendarDatePicker2WithActionButtonsConfig
     DateTime? lastDate,
     DateTime? currentDate,
     CalendarDatePicker2Mode? calendarViewMode,
-    YearPickerStyle? yearPickerStyle,
     List<String>? weekdayLabels,
     TextStyle? weekdayLabelTextStyle,
     WeekdayLabelBuilder? weekdayLabelBuilder,
@@ -739,7 +701,6 @@ class CalendarDatePicker2WithActionButtonsConfig
           lastDate: lastDate,
           currentDate: currentDate,
           calendarViewMode: calendarViewMode,
-          yearPickerStyle: yearPickerStyle,
           weekdayLabels: weekdayLabels,
           weekdayLabelTextStyle: weekdayLabelTextStyle,
           weekdayLabelBuilder: weekdayLabelBuilder,
@@ -842,7 +803,6 @@ class CalendarDatePicker2WithActionButtonsConfig
     DateTime? lastDate,
     DateTime? currentDate,
     CalendarDatePicker2Mode? calendarViewMode,
-    YearPickerStyle? yearPickerStyle,
     List<String>? weekdayLabels,
     TextStyle? weekdayLabelTextStyle,
     WeekdayLabelBuilder? weekdayLabelBuilder,
@@ -925,7 +885,6 @@ class CalendarDatePicker2WithActionButtonsConfig
       lastDate: DateUtils.dateOnly(lastDate ?? this.lastDate),
       currentDate: currentDate ?? this.currentDate,
       calendarViewMode: calendarViewMode ?? this.calendarViewMode,
-      yearPickerStyle: yearPickerStyle ?? this.yearPickerStyle,
       weekdayLabels: weekdayLabels ?? this.weekdayLabels,
       weekdayLabelTextStyle:
           weekdayLabelTextStyle ?? this.weekdayLabelTextStyle,
