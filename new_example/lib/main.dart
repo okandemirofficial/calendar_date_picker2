@@ -91,6 +91,8 @@ class _CalendarDatePicker2DemoState extends State<CalendarDatePicker2Demo> {
         perspective: 0.005,
         diameterRatio: 1.4,
         selectedBackgroundColor: Colors.blue,
+        maxAvailableYear: 2025,
+        minAvailableYear: 2020,
       ),
     );
 
