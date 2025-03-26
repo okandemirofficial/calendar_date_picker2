@@ -1,6 +1,6 @@
 part of '../calendar_date_picker2.dart';
 
-/// An alternative view for the year picker.
+/// An alternative view for the year picker using Cupertino style.
 ///
 /// The year picker widget is rarely used directly. Instead, consider using
 /// [CalendarDatePicker2], or [showDatePicker2] which create full date pickers.
@@ -46,10 +46,10 @@ class AlternativeYearPicker extends StatefulWidget {
 }
 
 class _AlternativeYearPickerState extends State<AlternativeYearPicker> {
-  late FixedExtentScrollController _scrollController;
-  late List<int> _availableYears;
-  late int _selectedYear;
+  late DateTime _selectedDate;
   late int _currentYear;
+  late int _minYear;
+  late int _maxYear;
 
   @override
   void initState() {
@@ -64,37 +64,26 @@ class _AlternativeYearPickerState extends State<AlternativeYearPicker> {
     // Get current year for highlighting
     _currentYear = DateUtils.dateOnly(DateTime.now()).year;
 
-    // Set the selected year if available, otherwise use the current year
-    _selectedYear =
+    // Set the selected date if available, otherwise use the initial month
+    _selectedDate =
         widget.selectedDates.isNotEmpty && widget.selectedDates[0] != null
-            ? widget.selectedDates[0]!.year
-            : _currentYear;
+            ? widget.selectedDates[0]!
+            : widget.initialMonth;
 
-    // Determine available years
-    final firstYear =
+    // Determine available years range
+    _minYear =
         alternativeConfig?.minAvailableYear ?? widget.config.firstDate.year;
-    final lastYear =
+    _maxYear =
         alternativeConfig?.maxAvailableYear ?? widget.config.lastDate.year;
 
-    // Create the list of available years
-    _availableYears = List.generate(
-      lastYear - firstYear + 1,
-      (index) => firstYear + index,
-    );
-
-    // Check if the selected year is within the available years
-    // If not, select the closest available year
-    if (!_availableYears.contains(_selectedYear)) {
-      _selectedYear = _selectedYear < firstYear ? firstYear : lastYear;
+    // Ensure selected date is within available years
+    if (_selectedDate.year < _minYear) {
+      _selectedDate =
+          DateTime(_minYear, _selectedDate.month, _selectedDate.day);
+    } else if (_selectedDate.year > _maxYear) {
+      _selectedDate =
+          DateTime(_maxYear, _selectedDate.month, _selectedDate.day);
     }
-
-    // Find the index of the selected year to calculate the scroll offset
-    final selectedIndex = _availableYears.indexOf(_selectedYear);
-
-    // Initialize the scroll controller
-    _scrollController =
-        widget.config.yearViewController as FixedExtentScrollController? ??
-            FixedExtentScrollController(initialItem: selectedIndex);
   }
 
   @override
@@ -111,14 +100,11 @@ class _AlternativeYearPickerState extends State<AlternativeYearPicker> {
     final alternativeConfig = widget.config.alternativeYearPickerConfig;
     final theme = Theme.of(context);
 
-    // Default text styles based on theme
-    final defaultYearTextStyle =
-        widget.config.yearTextStyle ?? theme.textTheme.bodyLarge;
-    final defaultSelectedYearTextStyle = widget.config.selectedYearTextStyle ??
-        theme.textTheme.headlineSmall
-            ?.copyWith(color: theme.colorScheme.primary);
-    final defaultDisabledYearTextStyle = widget.config.disabledYearTextStyle ??
-        theme.textTheme.bodyLarge?.copyWith(color: theme.disabledColor);
+    // Calculate picker height
+    final pickerHeight = alternativeConfig?.height ?? 180.0;
+
+    // Get background color
+    final backgroundColor = alternativeConfig?.backgroundColor;
 
     return Column(
       children: <Widget>[
@@ -129,38 +115,52 @@ class _AlternativeYearPickerState extends State<AlternativeYearPicker> {
         ),
         Expanded(
           child: Container(
-            height: alternativeConfig?.height ?? 180.0,
-            color: alternativeConfig?.backgroundColor,
-            child: ListWheelScrollView.useDelegate(
-              controller: _scrollController,
-              physics: const FixedExtentScrollPhysics(),
-              diameterRatio: alternativeConfig?.diameterRatio ?? 1.5,
-              perspective: alternativeConfig?.perspective ?? 0.01,
-              offAxisFraction: alternativeConfig?.offAxisFraction ?? 0.0,
-              squeeze: alternativeConfig?.squeeze ?? 1.0,
-              magnification: alternativeConfig?.magnification ?? 1.2,
-              itemExtent: alternativeConfig?.itemExtent ?? 40.0,
-              onSelectedItemChanged: (index) {
-                if (index >= 0 && index < _availableYears.length) {
-                  final year = _availableYears[index];
-                  if (_selectedYear != year) {
-                    setState(() {
-                      _selectedYear = year;
-                    });
+            height: pickerHeight,
+            color: backgroundColor,
+            child: CupertinoTheme(
+              data: CupertinoThemeData(
+                textTheme: CupertinoTextThemeData(
+                  dateTimePickerTextStyle: alternativeConfig?.yearTextStyle ??
+                      widget.config.yearTextStyle ??
+                      theme.textTheme.bodyLarge,
+                ),
+                primaryColor: theme.colorScheme.primary,
+              ),
+              child: CupertinoPicker(
+                scrollController: widget.config.yearViewController
+                        as FixedExtentScrollController? ??
+                    FixedExtentScrollController(
+                      initialItem: _selectedDate.year - _minYear,
+                    ),
+                magnification:
+                    (alternativeConfig?.magnification ?? 1.2).toDouble(),
+                squeeze: (alternativeConfig?.squeeze ?? 1.0).toDouble(),
+                diameterRatio:
+                    (alternativeConfig?.diameterRatio ?? 1.5).toDouble(),
+                offAxisFraction:
+                    (alternativeConfig?.offAxisFraction ?? 0.0).toDouble(),
+                itemExtent: (alternativeConfig?.itemExtent ?? 40.0).toDouble(),
+                backgroundColor: Colors.transparent,
+                selectionOverlay: _buildSelectionOverlay(alternativeConfig),
+                onSelectedItemChanged: (index) {
+                  final year = _minYear + index;
 
-                    // Create a new date based on the selected year
-                    // and the current selected date
-                    final currentDate = widget.selectedDates.isNotEmpty &&
-                            widget.selectedDates[0] != null
-                        ? widget.selectedDates[0]!
-                        : widget.initialMonth;
+                  // Check if year is selectable
+                  final isSelectable =
+                      widget.config.selectableYearPredicate == null ||
+                          widget.config.selectableYearPredicate!(year);
 
-                    // Update the date maintaining the month and day
+                  if (isSelectable) {
+                    // Create new date with selected year
                     final newDate = DateTime(
                       year,
-                      currentDate.month,
-                      currentDate.day,
+                      _selectedDate.month,
+                      _selectedDate.day,
                     );
+
+                    setState(() {
+                      _selectedDate = newDate;
+                    });
 
                     // Call onChanged with keepYearMode: true to prevent switching to day view
                     if (widget.onChanged is Function(DateTime,
@@ -171,75 +171,73 @@ class _AlternativeYearPickerState extends State<AlternativeYearPicker> {
                       widget.onChanged(newDate);
                     }
                   }
-                }
-              },
-              childDelegate: ListWheelChildBuilderDelegate(
-                childCount: _availableYears.length,
-                builder: (context, index) {
-                  final year = _availableYears[index];
-                  final isSelected = year == _selectedYear;
-                  final isCurrentYear = year == _currentYear;
+                },
+                children: List<Widget>.generate(
+                  _maxYear - _minYear + 1,
+                  (index) {
+                    final year = _minYear + index;
+                    final isSelected = year == _selectedDate.year;
+                    final isCurrentYear = year == _currentYear;
+                    final isDisabled =
+                        widget.config.selectableYearPredicate != null &&
+                            !widget.config.selectableYearPredicate!(year);
 
-                  // Check if year is selectable
-                  final isDisabled =
-                      widget.config.selectableYearPredicate != null &&
-                          !widget.config.selectableYearPredicate!(year);
+                    // Use custom builder if provided
+                    if (widget.config.yearBuilder != null) {
+                      final customWidget = widget.config.yearBuilder!(
+                        year: year,
+                        textStyle: isDisabled
+                            ? widget.config.disabledYearTextStyle ??
+                                theme.textTheme.bodyLarge
+                                    ?.copyWith(color: theme.disabledColor)
+                            : (isSelected
+                                ? widget.config.selectedYearTextStyle ??
+                                    theme.textTheme.headlineSmall?.copyWith(
+                                        color: theme.colorScheme.primary)
+                                : widget.config.yearTextStyle ??
+                                    theme.textTheme.bodyLarge),
+                        decoration: isSelected &&
+                                alternativeConfig?.selectedBackgroundColor !=
+                                    null
+                            ? BoxDecoration(
+                                color:
+                                    alternativeConfig!.selectedBackgroundColor,
+                                borderRadius: widget.config.yearBorderRadius ??
+                                    BorderRadius.circular(8),
+                              )
+                            : null,
+                        isSelected: isSelected,
+                        isDisabled: isDisabled,
+                        isCurrentYear: isCurrentYear,
+                      );
 
-                  // Use custom builder if provided
-                  if (widget.config.yearBuilder != null) {
-                    final customWidget = widget.config.yearBuilder!(
-                      year: year,
-                      textStyle: isDisabled
-                          ? defaultDisabledYearTextStyle
-                          : (isSelected
-                              ? defaultSelectedYearTextStyle
-                              : defaultYearTextStyle),
-                      decoration: isSelected &&
-                              alternativeConfig?.selectedBackgroundColor != null
-                          ? BoxDecoration(
-                              color: alternativeConfig!.selectedBackgroundColor,
-                              borderRadius: widget.config.yearBorderRadius ??
-                                  BorderRadius.circular(8),
-                            )
-                          : null,
-                      isSelected: isSelected,
-                      isDisabled: isDisabled,
-                      isCurrentYear: isCurrentYear,
-                    );
-
-                    if (customWidget != null) {
-                      return customWidget;
+                      if (customWidget != null) {
+                        return customWidget;
+                      }
                     }
-                  }
 
-                  // Default year item widget
-                  return Center(
-                    child: Container(
-                      decoration: isSelected &&
-                              alternativeConfig?.selectedBackgroundColor != null
-                          ? BoxDecoration(
-                              color: alternativeConfig!.selectedBackgroundColor,
-                              borderRadius: widget.config.yearBorderRadius ??
-                                  BorderRadius.circular(8),
-                            )
-                          : null,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16.0, vertical: 8.0),
+                    // Default year item widget
+                    return Center(
                       child: Text(
                         year.toString(),
                         style: isDisabled
                             ? (alternativeConfig?.disabledYearTextStyle ??
-                                defaultDisabledYearTextStyle)
+                                widget.config.disabledYearTextStyle ??
+                                theme.textTheme.bodyLarge
+                                    ?.copyWith(color: theme.disabledColor))
                             : (isSelected
                                 ? (alternativeConfig?.selectedYearTextStyle ??
-                                    defaultSelectedYearTextStyle)
+                                    widget.config.selectedYearTextStyle ??
+                                    theme.textTheme.headlineSmall?.copyWith(
+                                        color: theme.colorScheme.primary))
                                 : (alternativeConfig?.yearTextStyle ??
-                                    defaultYearTextStyle)),
+                                    widget.config.yearTextStyle ??
+                                    theme.textTheme.bodyLarge)),
                         textAlign: TextAlign.center,
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
             ),
           ),
@@ -250,6 +248,28 @@ class _AlternativeYearPickerState extends State<AlternativeYearPicker> {
               : null,
         ),
       ],
+    );
+  }
+
+  Widget? _buildSelectionOverlay(
+      AlternativeYearPickerConfig? alternativeConfig) {
+    final selectedColor = alternativeConfig?.selectedBackgroundColor;
+
+    if (selectedColor != null) {
+      return Container(
+        decoration: BoxDecoration(
+          color: selectedColor.withOpacity(0.1),
+          borderRadius:
+              widget.config.yearBorderRadius ?? BorderRadius.circular(8),
+          border: Border.all(
+            color: selectedColor,
+            width: 1.0,
+          ),
+        ),
+      );
+    }
+    return CupertinoPickerDefaultSelectionOverlay(
+      background: Colors.transparent,
     );
   }
 }
